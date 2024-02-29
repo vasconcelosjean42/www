@@ -28,6 +28,7 @@ export default function Bottom({ totalPrice, onPress }: Props) {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
+    height: "100%",
     backgroundColor: "#cbd5e1",
     display: "flex",
     flexDirection: "row",
@@ -35,10 +36,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
   },
   button: {
-    width: 250,
+    width: 220,
   },
   text: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: "bold",
   }
 });

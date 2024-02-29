@@ -1,16 +1,18 @@
+import { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import SelectDropdown from "react-native-select-dropdown";
 
 interface Props {
   data: string[] | number[];
-  onSelect?: (event: any) => void
+  onSelect?: (event: any) => void;
+  value?: string;
 }
 
-export default function Select({ data, onSelect }: Props) {
+export default function Select({ data, onSelect, value }: Props) {
   return (
     <SelectDropdown
-      defaultValue={data[0]}
-      defaultButtonText="Forma de pagamento"
+      defaultValue={value ? value:  data[0]}
+      defaultButtonText={data[0].toString()}
       buttonStyle={styles.button}
       rowStyle={styles.row}
       dropdownStyle={styles.dropdown}
@@ -25,6 +27,7 @@ const styles = StyleSheet.create({
     width: "100%",
     borderRadius: 5,
     marginVertical: 20,
+    backgroundColor: "#cecece"
   },
   row: {
     width: "100%",

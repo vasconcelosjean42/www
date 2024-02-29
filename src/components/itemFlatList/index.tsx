@@ -12,9 +12,10 @@ export default function ItemFlatList({ item, onPress }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.amount}>
-        <Text style={styles.defaultText}>{String(item.amount)}x</Text>
+        <Text style={styles.defaultText}>{String(item.amount)}{item.type === "KG" ? "kg" : "x" }</Text>
       </View>
       <View style={styles.code}>
+      <Text style={[styles.defaultText, {color: "#999999"}]}>{item.code}</Text>
         <Text style={styles.defaultText}>{item.name}</Text>
       </View>
       <View style={styles.price}>
@@ -33,11 +34,12 @@ export default function ItemFlatList({ item, onPress }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    height: 50,
+    flex: 1,
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    borderBottomWidth: 1
+    borderBottomWidth: 1,
+    paddingVertical: 5
   },
   defaultText: {
     fontSize: 15,

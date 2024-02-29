@@ -1,4 +1,13 @@
-import { Alert, Dimensions, FlatList, StyleSheet, View } from "react-native";
+import {
+  Alert,
+  BackHandler,
+  Dimensions,
+  FlatList,
+  KeyboardAvoidingView,
+  StatusBar,
+  StyleSheet,
+  View,
+} from "react-native";
 import Select from "../components/select";
 import Button from "../components/button";
 import Input from "../components/input";
@@ -9,12 +18,18 @@ import Bottom from "../components/bottom";
 import SellModal from "../components/sellModal";
 import { ProductContext } from "../contexts/productContext";
 import { ProductContextType } from "../@types/product";
+import KGModal from "../components/kgModal";
+import * as Print from "expo-print";
+import { ParamListBase, useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import Input2 from "../components/input/index2";
 
 export interface ItemProps {
   amount: number;
   code: string;
   name: string;
   price: number;
+  type: string;
 }
 
 export default function Venda() {
@@ -22,84 +37,46 @@ export default function Venda() {
     register,
     control,
     handleSubmit,
-    setFocus,
+    getValues,
+    setValue,
     setError,
+    reset,
     watch,
-    formState: { errors, isSubmitSuccessful, isSubmitted },
-  } = useForm({
-    defaultValues: { code: "", amount: 1, name: "", price: 0 },
+    formState: {
+      errors,
+      isSubmitSuccessful,
+      isSubmitted,
+      submitCount,
+      isDirty,
+    },
+  } = useForm<ItemProps>({
+    defaultValues: { amount: 1 },
   });
-
+  const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
   const [item, setItem] = useState<ItemProps[]>([]);
   const { products } = useContext(ProductContext) as ProductContextType;
-  const [groceryProducts, setGroceryProducts] = useState([
-    {
-      code: "1",
-      name: "Feijão preto 500g",
-      price: 5.5,
-    },
-    {
-      code: "2",
-      name: "Arroz branco 1kg",
-      price: 7,
-    },
-    {
-      code: "3",
-      name: "Açúcar cristal 500g",
-      price: 3.5,
-    },
-    {
-      code: "4",
-      name: "Óleo de soja 500ml",
-      price: 5,
-    },
-    {
-      code: "5",
-      name: "Leite integral 1L",
-      price: 4,
-    },
-    {
-      code: "6",
-      name: "Café torrado e moído 250g",
-      price: 8,
-    },
-    {
-      code: "7",
-      name: "Macarrão espaguete 500g",
-      price: 3,
-    },
-    {
-      code: "8",
-      name: "Farinha de trigo 1kg",
-      price: 4.5,
-    },
-    {
-      code: "9",
-      name: "Tomate pelado em lata 400g",
-      price: 4,
-    },
-    {
-      code: "10",
-      name: "Sal refinado 500g",
-      price: 1.5,
-    },
-  ]);
   const [isVisible, setIsVisible] = useState(false);
+  const [isKGVisible, setIsKGVisible] = useState(false);
+  const [KGProductPrice, setKGProductPrice] = useState(0);
+  const [KGProductName, setKGProductName] = useState("");
 
   const totalPrice = item
     .reduce((prev, curr) => prev + curr.price, 0)
     .toFixed(2);
+
   const handleAddItem = (data: ItemProps) => {
     console.log(data);
-
-    const groceryItem = products.find((gp) => gp.code === data.code);
-    if (data.code.length === 0) {
-      setError("code", {
-        message: "É necessário informar o código",
-      });
-      return;
-    }
-    if (!groceryItem) {
+    let groceryItem = products.find((gp) => gp.code === data.code);
+    if (!groceryItem)
+      groceryItem = products.find((gp) => gp.externalCode === data.code); // if (data.code === "") {
+    //   setError("code", {
+    //     message: "É necessário informar o código",
+    //   });
+    //   return;
+    // }
+    console.log(groceryItem);
+    if (data.code === "" || !groceryItem) {
+      if (data.code === undefined) return;
       setError("code", {
         message: "Esse produto não está cadastrado",
       });
@@ -111,9 +88,10 @@ export default function Venda() {
           item.code === data.code
             ? {
                 ...item,
-                amount: item.amount + data.amount,
+                amount: Number(item.amount) + Number(data.amount),
                 price: groceryItem
-                  ? (item.amount + data.amount) * groceryItem.sellValue
+                  ? (Number(item.amount) + Number(data.amount)) *
+                    groceryItem.sellValue
                   : item.price,
               }
             : item
@@ -126,6 +104,7 @@ export default function Venda() {
       code: data.code,
       name: groceryItem?.name || data.code,
       price: (groceryItem?.sellValue || 10) * data.amount,
+      type: groceryItem?.type ? groceryItem.type : "UND",
     };
     setItem((prevState) => [...prevState, newItem]);
   };
@@ -152,90 +131,188 @@ export default function Venda() {
     );
   };
 
-  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+  const sleep = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
 
   useEffect(() => {
-    let ignore = false
-    setTimeout(() => { if(!ignore) handleSubmit(handleAddItem)()}, 100)
-    return () => {ignore = true}
-  }, [watch("code")])
+    reset({ code: "" });
+  }, [isSubmitSuccessful]);
+
+  useEffect(() => {
+    let ignore = false;
+    if (getValues("code") === "") return;
+    console.log("Entrou no useEffect");
+
+    let product = products.find(
+      (product) => product.code === getValues("code")
+    );
+    if (!product)
+      product = products.find(
+        (product) => product.externalCode === getValues("code")
+      );
+    console.log("product: ");
+
+    console.log(product);
+    if (product?.type && product.type === "KG") {
+      setKGProductPrice(product.sellValue);
+      setKGProductName(product.name);
+      setIsKGVisible(true);
+      return;
+    } else {
+      setTimeout(() => {
+        if (!ignore) handleSubmit(handleAddItem)();
+      }, 1000);
+    }
+    return () => {
+      ignore = true;
+    };
+  }, [watch("code")]);
+
+  const backAction = () => {
+    console.log(isDirty);
+    if (isDirty) {
+      Alert.alert(
+        "Você tem produtos na lista",
+        "Você tem certeza que deseja voltar? O lista contem produtos",
+        [
+          {
+            text: "Cancelar",
+            onPress: () => false,
+            style: "cancel",
+          },
+          { text: "SIM", onPress: () => navigation.navigate("Home") },
+        ]
+      );
+      return true;
+    } else {
+      return;
+    }
+  };
+
+  useEffect(() => {
+    BackHandler.addEventListener("hardwareBackPress", () => {
+      navigation.navigate("Home");
+      return true;
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!item)
+      BackHandler.addEventListener("hardwareBackPress", () => {
+        navigation.navigate("Home");
+        return true;
+      });
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, [item]);
 
   return (
-    <View style={styles.container}>
-      <SellModal
-        isVisible={isVisible}
-        setIsVisible={() => setIsVisible((prevState) => !prevState)}
-        totalPrice={Number(totalPrice)}
-      />
-      <View style={styles.header}>
-        <View style={styles.select}>
+    <KeyboardAvoidingView behavior="height" style={styles.container}>
+      <View>
+        <SellModal
+          isVisible={isVisible}
+          setIsVisible={() => setIsVisible((prevState) => !prevState)}
+          totalPrice={Number(totalPrice)}
+          items={item}
+          onConfirm={() => {
+            setIsVisible(false);
+            setItem([]);
+          }}
+        />
+        <KGModal
+          isVisible={isKGVisible}
+          setIsVisible={() => {
+            reset();
+            setIsKGVisible((prevState) => !prevState);
+          }}
+          onConfirm={(amount: number) => {
+            setValue("amount", amount);
+            handleSubmit(handleAddItem)();
+            setIsKGVisible((prevState) => !prevState);
+            setValue("amount", 1);
+          }}
+          totalPrice={KGProductPrice}
+          productName={KGProductName}
+        />
+        <View style={styles.header}>
+          <View style={styles.select}>
+            <Controller
+              control={control}
+              name="amount"
+              render={({ field: { onChange } }) => (
+                <Select
+                  data={Array(100)
+                    .fill(0)
+                    .map((value, index) => index + 1)}
+                  onSelect={(data) => onChange(data)}
+                />
+              )}
+            />
+          </View>
           <Controller
             control={control}
-            name="amount"
-            render={({ field: { onChange } }) => (
-              <Select
-                data={Array(100)
-                  .fill(0)
-                  .map((value, index) => index + 1)}
-                onSelect={(data) => onChange(data)}
+            name="code"
+            // rules={{
+            //   required: "É necessário informar o código",
+            // }}
+            render={({ field: { onChange, value, onBlur } }) => (
+              <Input2
+                keyboardType="numeric"
+                {...register("code")}
+                text={"código"}
+                value={value}
+                onChangeText={(text) => {
+                  onChange(text);
+                }}
+                onBlur={() => {
+                  onBlur();
+                }}
+                errorMessage={errors.code?.message}
+                autoFocus
               />
             )}
           />
-        </View>
-        <Controller
-          control={control}
-          name="code"
-          // rules={{
-          //   required: "É necessário informar o código",
-          // }}
-          render={({ field: { onChange, value, ref } }) => (
-            <Input
-              {...register("code")}
-              text={"Código"}
-              width={10}
-              value={isSubmitSuccessful ? "" : value}
-              onChangeText={(text) => {
-                  onChange(text);
-                  
-              }}
-              errorMessage={errors.code?.message}
-              autoFocus
-            />
-          )}
-        />
-        <View style={{ width: "18%", marginTop: 20, marginLeft: 3 }}>
+          {/* <View style={{ width: "18%", marginTop: 20, marginLeft: 3 }}>
           <Button text={"+"} onPress={handleSubmit(handleAddItem)} />
+        </View> */}
+        </View>
+        <View style={styles.content}>
+          <FlatList
+            data={item}
+            keyExtractor={(item) => String(item.code)}
+            renderItem={({ item }) => (
+              <ItemFlatList
+                item={item}
+                onPress={() => handleDeleteItem(item.code)}
+              />
+            )}
+            style={styles.flatList}
+          />
+        </View>
+        <View style={styles.bottom}>
+          <Bottom
+            totalPrice={totalPrice}
+            onPress={() => {
+              setIsVisible((prevState) => !prevState);
+            }}
+          />
         </View>
       </View>
-      <View style={styles.content}>
-        <FlatList
-          data={item}
-          keyExtractor={(item) => String(item.code)}
-          renderItem={({ item }) => (
-            <ItemFlatList
-              item={item}
-              onPress={() => handleDeleteItem(item.code)}
-            />
-          )}
-          style={styles.flatList}
-        />
-      </View>
-      <View style={styles.bottom}>
-        <Bottom
-          totalPrice={totalPrice}
-          onPress={() => setIsVisible((prevState) => !prevState)}
-        />
-      </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("screen").height,
+    paddingTop: StatusBar.currentHeight,
     backgroundColor: "#fff",
     alignItems: "center",
-    paddingTop: 50,
     justifyContent: "flex-start",
     display: "flex",
   },
@@ -243,8 +320,7 @@ const styles = StyleSheet.create({
     width: 400,
     display: "flex",
     flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "flex-start",
+    alignItems: "center",
   },
   select: {
     width: "18%",
@@ -252,13 +328,14 @@ const styles = StyleSheet.create({
   },
   content: {
     width: 400,
-    height: "78%",
+    flex: 1,
     display: "flex",
     flexDirection: "row",
   },
   flatList: {},
   bottom: {
     width: Dimensions.get("window").width,
+    height: "12%",
     backgroundColor: "#777222",
   },
 });

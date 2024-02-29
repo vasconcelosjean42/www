@@ -6,6 +6,7 @@ import Home from "../screens/Home";
 import Cadastro from "../screens/Cadastro";
 import Lista from "../screens/Lista";
 import ProductProvider from "../contexts/productContext";
+import EditarProduto from "../screens/EditarProduto";
 
 const Stack = createStackNavigator();
 
@@ -18,6 +19,7 @@ export default function StackRoutes() {
         <Stack.Screen name="Venda" component={Venda} />
         <Stack.Screen name="Cadastro" component={Cadastro} />
         <Stack.Screen name="Lista" component={Lista} />
+        <Stack.Screen name="EditarProduto" component={EditarProduto} />
       </Stack.Navigator>
     </ProductProvider>
   );

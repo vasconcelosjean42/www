@@ -5,7 +5,6 @@ import { ParamListBase, useNavigation } from "@react-navigation/native";
 
 export default function Home() {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
-
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -17,7 +16,7 @@ export default function Home() {
           <Button text={"Venda"} onPress={() => navigation.navigate("Venda")} />
         </View>
         <View style={styles.button}>
-          <Button text={"Cadastro"} onPress={() => navigation.navigate("Cadastro")} />
+          <Button text={"Cadastro"} onPress={() => navigation.navigate("Cadastro", {test: "test"})} />
         </View>
         <View style={styles.button}>
           <Button text={"Lista"} onPress={() => navigation.navigate("Lista")} />

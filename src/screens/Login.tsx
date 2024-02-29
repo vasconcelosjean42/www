@@ -5,20 +5,25 @@ import Input from "../components/input";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { ParamListBase, useNavigation } from "@react-navigation/native";
 import { Controller, useForm } from "react-hook-form";
+import Input2 from "../components/input/index2";
 
-interface Props{
-  user: string,
-  password: string
+interface Props {
+  user: string;
+  password: string;
 }
 
 export default function Login() {
-  const { control, handleSubmit, formState: {errors, isValid} } = useForm<Props>();
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<Props>();
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
   const onSubmit = (data: Props) => {
     console.log(data);
-    if (isValid) navigation.navigate("Home")
-  }
+    if (isValid) navigation.navigate("Home");
+  };
 
   return (
     <View style={styles.container}>
@@ -31,13 +36,29 @@ export default function Login() {
           control={control}
           name={"user"}
           rules={{ required: "O nome de usuário deve ser informado" }}
-          render={({field: {onChange}}) => <Input text={"Usuário"} errorMessage={errors.user?.message} onChangeText={onChange}/>}
+          render={({ field: { onChange } }) => (
+            <View style={{width: "100%", marginVertical: 15}}>
+              <Input2
+                text={"Usuário"}
+                errorMessage={errors.user?.message}
+                onChangeText={onChange}
+              />
+            </View>
+          )}
         />
         <Controller
           control={control}
           name={"password"}
           rules={{ required: "A senha deve ser informada" }}
-          render={({field: {onChange}}) => <InputPassword text={"Senha"} errorMessage={errors.password?.message} onChangeText={onChange}/>}
+          render={({ field: { onChange } }) => (
+            <View style={{width: "100%", marginBottom: 15}}>
+            <InputPassword
+              text={"Senha"}
+              errorMessage={errors.password?.message}
+              onChangeText={onChange}
+            />
+            </View>
+          )}
         />
 
         <Button text={"Entrar"} onPress={handleSubmit(onSubmit)} />
