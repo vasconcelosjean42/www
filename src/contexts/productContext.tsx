@@ -252,7 +252,6 @@ const ProductProvider: FC<{ children: ReactNode }> = ({ children }) => {
       sellValue: sellValue,
       amount: amount,
     };
-    console.log(newProduct);
     
     setProducts(prevState => prevState.map(product => product.id === id ? newProduct : product))
   }

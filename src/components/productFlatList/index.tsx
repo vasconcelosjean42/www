@@ -1,14 +1,12 @@
 import {
-  GestureResponderEvent,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import { ItemProps } from "../../screens/Venda";
 import { Ionicons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
-import { IProduct, ProductContextType } from "../../@types/product";
+import { IProduct } from "../../@types/product";
 import { ParamListBase, useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 
@@ -30,10 +28,11 @@ export default function ProductFlatList({ item, onRemove }: Props) {
           <Text style={styles.priceText}>
             R$ {item.sellValue && String(Number(item.sellValue).toFixed(2))}
           </Text>
+          <Text style={styles.brighterText}>Quantidade: {String(item.amount)}</Text>
         </View>
         <View style={styles.amountCode}>
-          <Text style={styles.brighterText}>Qtd: {String(item.amount)}</Text>
-          <Text style={styles.brighterText}>Cod: {item.code}</Text>
+          {item.code && <Text style={styles.brighterText}>Cod: {item.code}</Text>}
+          {item.externalCode && <Text style={styles.brighterText}>Externo: {item.externalCode}</Text>}
         </View>
       </View>
       <TouchableOpacity style={styles.delete} onPress={() => navigation.navigate("EditarProduto", {id: item.id})}>
@@ -71,7 +70,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "900",
   },
-  price: {},
+  price: {
+    display: "flex",
+    flexDirection: "row",
+    gap: 15
+  },
   priceText: {
     fontSize: 16,
   },

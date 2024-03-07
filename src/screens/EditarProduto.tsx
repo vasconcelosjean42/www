@@ -13,7 +13,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { ParamListBase, useNavigation } from "@react-navigation/native";
 import { Controller, useForm } from "react-hook-form";
 import Input3 from "../components/input/index3";
-import { useContext, useEffect, useLayoutEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ProductContext } from "../contexts/productContext";
 import { ProductContextType } from "../@types/product";
 import { ScrollView } from "react-native-gesture-handler";
@@ -77,7 +77,6 @@ export default function EditarProduto({ route }: Props) {
     }
   }, []);
   const onSubmit = (data: ProductProps) => {
-    console.log(data);
     const productUpdated = {
       ...data,
       id,
@@ -86,7 +85,6 @@ export default function EditarProduto({ route }: Props) {
     };
 
     editProduct(productUpdated);
-    console.log("isValid? " + isValid);
     if (isValid) {
       reset();
       navigation.navigate("Lista");
@@ -113,6 +111,13 @@ export default function EditarProduto({ route }: Props) {
       return;
     }
   };
+
+  useEffect(() => {
+    BackHandler.addEventListener("hardwareBackPress", () => {
+      navigation.goBack();
+      return true;
+    });
+  }, []);
 
   useEffect(
     () => {

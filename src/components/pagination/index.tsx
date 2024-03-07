@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 import Button from "../button";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
 interface Props {
@@ -13,9 +13,6 @@ export default function Pagination({ paginationAmount, page, onPress }: Props) {
   const arrayPages = Array<number>(paginationAmount !== 0 ? paginationAmount : 1)
     .fill(0)
     .map((item, index) => index);
-  useEffect(() => {
-    console.log(paginationAmount);
-  }, []);
 
   return (
     <View style={styles.container}>

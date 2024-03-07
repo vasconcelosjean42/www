@@ -4,12 +4,20 @@ import Button from "../button";
 interface Props {
   totalPrice: string;
   onPress: () => void;
+  openHistoric: () => void
 }
 
-export default function Bottom({ totalPrice, onPress }: Props) {
+export default function Bottom({ totalPrice, onPress, openHistoric }: Props) {
   const disableButton = totalPrice === "0.00";
   return (
     <View style={styles.container}>
+      <View style={styles.historic}>
+        <Button
+          text={"☰"}
+          onPress={openHistoric}
+          style={{ backgroundColor: "#0284c7" }}
+        />
+      </View>
       <View style={styles.button}>
         <Button
           text={"vender"}
@@ -34,12 +42,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-evenly",
+    gap: 10,
+    paddingHorizontal: 5,
+  },
+  historic: {
+    width: 60
   },
   button: {
-    width: 220,
+    width: 200,
   },
   text: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
   }
 });

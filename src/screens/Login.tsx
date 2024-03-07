@@ -1,7 +1,6 @@
 import { Image, StyleSheet, View } from "react-native";
 import Button from "../components/button";
 import InputPassword from "../components/inputPassword";
-import Input from "../components/input";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { ParamListBase, useNavigation } from "@react-navigation/native";
 import { Controller, useForm } from "react-hook-form";
@@ -21,7 +20,6 @@ export default function Login() {
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
 
   const onSubmit = (data: Props) => {
-    console.log(data);
     if (isValid) navigation.navigate("Home");
   };
 

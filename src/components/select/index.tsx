@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import SelectDropdown from "react-native-select-dropdown";
 

@@ -15,11 +15,19 @@ import { useForm, Controller } from "react-hook-form";
 import Bottom from "../components/bottom";
 import SellModal from "../components/sellModal";
 import { ProductContext } from "../contexts/productContext";
-import { IProduct, ProductContextType } from "../@types/product";
+import { ProductContextType } from "../@types/product";
 import KGModal from "../components/kgModal";
 import { ParamListBase, useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import Input2 from "../components/input/index2";
+
+export interface ItemProps {
+  amount: number;
+  code: string;
+  name: string;
+  price: number;
+  type: string;
+}
 
 export default function Venda() {
   const {
@@ -38,11 +46,11 @@ export default function Venda() {
       submitCount,
       isDirty,
     },
-  } = useForm<IProduct>({
+  } = useForm<ItemProps>({
     defaultValues: { amount: 1 },
   });
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
-  const [item, setItem] = useState<IProduct[]>([]);
+  const [item, setItem] = useState<ItemProps[]>([]);
   const { products } = useContext(ProductContext) as ProductContextType;
   const [isVisible, setIsVisible] = useState(false);
   const [isKGVisible, setIsKGVisible] = useState(false);
@@ -50,19 +58,19 @@ export default function Venda() {
   const [KGProductName, setKGProductName] = useState("");
 
   const totalPrice = item
-    .reduce((prev, curr) => prev + curr.sellValue, 0)
+    .reduce((prev, curr) => prev + curr.price, 0)
     .toFixed(2);
 
-  const handleAddItem = (data: IProduct) => {
-    let product = products.find((product) => product.code === data.code);
-    if (!product)
-      product = products.find((product) => product.externalCode === data.code); // if (data.code === "") {
+  const handleAddItem = (data: ItemProps) => {
+    let groceryItem = products.find((gp) => gp.code === data.code);
+    if (!groceryItem)
+      groceryItem = products.find((gp) => gp.externalCode === data.code); // if (data.code === "") {
     //   setError("code", {
     //     message: "É necessário informar o código",
     //   });
     //   return;
     // }
-    if (data.code === "" || !product) {
+    if (data.code === "" || !groceryItem) {
       if (data.code === undefined) return;
       setError("code", {
         message: "Esse produto não está cadastrado",
@@ -76,23 +84,22 @@ export default function Venda() {
             ? {
                 ...item,
                 amount: Number(item.amount) + Number(data.amount),
-                sellValue: product
+                price: groceryItem
                   ? (Number(item.amount) + Number(data.amount)) *
-                    product.sellValue
-                  : item.sellValue,
+                    groceryItem.sellValue
+                  : item.price,
               }
             : item
         )
       );
       return;
     }
-    const newItem: IProduct = {
-      ...data,
+    const newItem: ItemProps = {
       amount: data.amount,
       code: data.code,
-      name: product?.name || data.code,
-      sellValue: (product?.sellValue || 10) * data.amount,
-      type: product?.type ? product.type : "UND",
+      name: groceryItem?.name || data.code,
+      price: (groceryItem?.sellValue || 10) * data.amount,
+      type: groceryItem?.type ? groceryItem.type : "UND",
     };
     setItem((prevState) => [...prevState, newItem]);
   };
@@ -169,7 +176,7 @@ export default function Venda() {
       );
       return true;
     } else {
-      return false;
+      return;
     }
   };
 
@@ -256,7 +263,6 @@ export default function Venda() {
                 onBlur={() => {
                   onBlur();
                 }}
-                blurOnSubmit={false}
                 errorMessage={errors.code?.message}
                 autoFocus
               />

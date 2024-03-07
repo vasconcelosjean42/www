@@ -10,7 +10,7 @@ interface Props extends TextInputProps {
   setFocus?: () => void;
 }
 
-export default function Input({
+export default function InputDecrapted({
   text,
   width,
   onChangeText,

@@ -1,10 +1,8 @@
 import {
     StyleSheet,
-    Text,
     TextInputProps,
     View,
   } from "react-native";
-  import { TextInput } from "react-native-gesture-handler";
 import Input2 from "../input/index2";
   
   interface Props extends TextInputProps{

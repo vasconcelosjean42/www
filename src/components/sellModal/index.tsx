@@ -1,26 +1,28 @@
-import { Modal, StyleSheet, Text, View } from "react-native";
+import { Modal, SafeAreaViewBase, StyleSheet, Text, View } from "react-native";
 import Button from "../button";
 import Input from "../input";
 import Select from "../select";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import * as Print from "expo-print";
-
-import { ItemProps } from "../../screens/Venda";
 import { TextInputMask } from "react-native-masked-text";
+import { IProduct } from "../../@types/product";
+import { SellContext } from "../../contexts/sellContext";
+import { ISell, SellContextType } from "../../@types/sell";
+import printCall from "../../utils/printCall";
 
 interface SellProps {
-  name: string;
-  number: string;
-  paymentType: string;
-  paymentValue: number;
+  buyerName: string,
+  buyerNumber: string,
+  paymentValue: number,
+  typeOfPayment: string,
 }
 
 interface Props {
   isVisible: boolean;
   setIsVisible: () => void;
   totalPrice: number;
-  items: ItemProps[];
+  items: IProduct[];
   onConfirm: () => void;
 }
 
@@ -36,9 +38,10 @@ export default function SellModal({
     handleSubmit,
     reset,
     getValues,
+    clearErrors,
     formState: { errors, isValid },
   } = useForm<SellProps>();
-
+  const {sells, saveSell} = useContext(SellContext) as SellContextType
   const [select, setSelect] = useState("Dinheiro");
   const [paymentValue, setPaymentValue] = useState(0);
   const change = totalPrice - paymentValue;
@@ -48,80 +51,20 @@ export default function SellModal({
   }, [select]);
 
   const onSubmit = async (data: SellProps) => {
-    const html = `
-    <html>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
-      </head>
-      <body style="font-size: 30px; text-align: left; padding: 80px 40px">
-        <div>
-        <div style="display: flex; flex-direction: row; font-family: Helvetica Neue; font-weight: normal;">
-          <h1 style="font-size: 40px; font-family: Helvetica Neue; font-weight: normal;">
-            JMM VENDAS RÁPIDAS
-          </h1>
-          <p style="justify-self: right; text-align: right"> 26/02/2024\n15:50</p>
-          </div>
-          <div style="display: flex; flex-direction: column; font-family: Helvetica Neue; font-weight: normal;">
-            <p style="font-weight: bold"> Cliente: ${
-              getValues("name") || "n/a"
-            }\n </p>
-            <p> Contato: ${getValues("number") || "n/a"} </p>
-            <p> Tipo de pagamento: ${
-              getValues("paymentType") || "Dinheiro"
-            } </p>
-            <p> Venda (n: 1) </p>
-          </div>
-          <br/>
-          <div style="border-style: double; border-width: 4px 0px; display: flex; flex-direction: row; justify-content: space-between">
-            <em>Descrição/QuantidadeXUnitário</em>
-            <em>Total</em>
-          </div>
-          <div style="display: flex; flex-direction: column; justify-content: space-between">
-          ${items
-            .map(
-              ({ amount, name, price, type }) =>
-                "<div style='border-style: dotted; border-width: 0px 0px 2px 0px; display: flex; flex-direction: row; justify-content: space-between'>" +
-                "<div>" +
-                "<p>" +
-                name.toString() +
-                "</p>" +
-                "<p>" +
-                amount.toString() +
-                "(" +
-                type?.toString() +
-                ") X R$ " +
-                (price / amount).toFixed(2).toString() +
-                "</p>" +
-                "</div>" +
-                "<div>" +
-                "<p>" +
-                "R$" +
-                price.toFixed(2).toString() +
-                "</p>" +
-                "</div>" +
-                "</div>"
-            )
-            .toString()
-            .replaceAll(",", "")}
-          <div style="border-width: 0px 0px 2px 0px; display: flex; flex-direction: row; justify-content: space-between">
-            <em>Total a Pagar</em>
-            <em>${
-              "R$" +
-              items
-                .reduce((prev, curr) => Number(prev) + Number(curr.price), 0)
-                .toFixed(2)
-            }</em>
-          </div>
-        </div>
-    </body>
-    </html>
-    `;
-    if (isValid)
-      await Print.printAsync({
-        html,
-      }).catch((err) => console.log(err));
-    onConfirm();
-  };
+    const sellProps = {
+      ...data,
+      products: items,
+      totalPrice,
+      sellDate: new Date()
+    }
+    printCall({sellProps, isValid})
+        .then(() => {
+          onConfirm();
+          setSelect("Dinheiro")
+          saveSell(sellProps)
+        })
+        .catch((err) => console.log(err));
+    }
 
   return (
     <Modal animationType="fade" transparent visible={isVisible}>
@@ -129,14 +72,14 @@ export default function SellModal({
         <View style={styles.modalView}>
           <Controller
             control={control}
-            name="name"
+            name="buyerName"
             render={({ field: { onChange } }) => (
               <Input text={"Nome"} onChangeText={onChange} />
             )}
           />
           <Controller
             control={control}
-            name="number"
+            name="buyerNumber"
             defaultValue=""
             render={({ field: { value, onChange } }) => (
               <TextInputMask
@@ -159,13 +102,14 @@ export default function SellModal({
           />
           <Controller
             control={control}
-            name="paymentType"
+            name="typeOfPayment"
             render={({ field: { value, onChange } }) => (
               <Select
                 data={["Dinheiro", "Pix", "Débito", "Crédito"]}
                 onSelect={(e) => {
                   setSelect(e);
                   onChange(e);
+                  clearErrors();
                 }}
                 value={"Dinheiro"}
               />
@@ -225,6 +169,7 @@ export default function SellModal({
     </Modal>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {

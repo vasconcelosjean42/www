@@ -1,7 +1,5 @@
 import { Modal, StyleSheet, Text, View } from "react-native";
 import Button from "../button";
-import Input from "../input";
-import Select from "../select";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import Input2 from "../input/index2";

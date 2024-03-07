@@ -1,9 +1,9 @@
 import { GestureResponderEvent, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { ItemProps } from "../../screens/Venda";
 import { Ionicons } from "@expo/vector-icons";
+import { IProduct } from "../../@types/product";
 
 interface Props {
-  item: ItemProps;
+  item: IProduct;
   onPress: (event: GestureResponderEvent) => void
 }
 
@@ -19,7 +19,7 @@ export default function ItemFlatList({ item, onPress }: Props) {
         <Text style={styles.defaultText}>{item.name}</Text>
       </View>
       <View style={styles.price}>
-        <Text style={styles.defaultText}>R$ {item.price && String(item.price.toFixed(2))}</Text>
+        <Text style={styles.defaultText}>R$ {item.sellValue && String(item.sellValue.toFixed(2))}</Text>
       </View>
       <TouchableOpacity style={styles.delete} onPress={onPress}>
       <Ionicons

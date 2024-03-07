@@ -13,11 +13,10 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { ParamListBase, useNavigation } from "@react-navigation/native";
 import { Controller, useForm } from "react-hook-form";
 import Input2 from "../components/input/index2";
-import React, { useContext, useEffect, useReducer, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { ProductContext } from "../contexts/productContext";
 import { ProductContextType } from "../@types/product";
 import { ScrollView } from "react-native-gesture-handler";
-import type { StackScreenProps } from "@react-navigation/stack";
 import Select from "../components/select";
 
 interface ProductProps {
@@ -47,19 +46,20 @@ export default function Cadastro() {
     setError,
     unregister,
     register,
-    formState: { errors, isValid, touchedFields, isDirty, isSubmitSuccessful },
+    setFocus,
+    formState: { errors, isValid, touchedFields, isDirty, isSubmitSuccessful, isSubmitted },
   } = useForm<ProductProps>();
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
   const onSubmit = (data: ProductProps) => {
     saveProduct({ ...data, id: "", type: getValues("type") });
     if (isValid) {
       reset();
-      navigation.navigate("Venda");
+      navigation.navigate("Home")
+      navigation.navigate("Cadastro")
     }
   };
 
   const backAction = () => {
-    console.log(isDirty);
     if (isDirty) {
       Alert.alert(
         "Você não terminou o cadastro",
@@ -91,10 +91,6 @@ export default function Cadastro() {
     !isDirty ? [watch()] : [""]
   );
 
-  useEffect(() => {
-    console.log(watch("externalCode"));
-  }, [getValues()]);
-
   const [counter, setCounter] = useState(0);
 
   return (
@@ -115,6 +111,7 @@ export default function Cadastro() {
               name="code"
               render={({ field: { onChange, value } }) => (
                 <Input2
+                  {...register("code")}
                   text={"Código de barras"}
                   value={value}
                   errorMessage={errors.code?.message}
@@ -124,6 +121,7 @@ export default function Cadastro() {
                   }}
                   keyboardType="numeric"
                   maxLength={20}
+                  autoFocus
                 />
               )}
             />

@@ -1,8 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 import Button from "../button";
-import { useEffect, useState } from "react";
-import { TouchableOpacity } from "react-native-gesture-handler";
-import Input2 from "../input/index2";
+import { useEffect } from "react";
 import Select from "../select";
 interface Props {
   paginationAmount: number;
@@ -15,9 +13,6 @@ export default function ManualPagination({ paginationAmount, page, onPress }: Pr
   const arrayPages = Array<number>(paginationAmount !== 0 ? paginationAmount : 1)
     .fill(0)
     .map((item, index) => index);
-  useEffect(() => {
-    console.log(paginationAmount);
-  }, []);
 
   return (
     <View style={styles.container}>
