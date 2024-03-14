@@ -15,7 +15,7 @@ import { SellContextType } from "../@types/sell";
 import SellFlatList from "../components/sellFlatList";
 import { ParamListBase, useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { Calendar } from "react-native-calendars";
+import RangeSelector from "../components/rangeSelector";
 
 interface Props {
   user: string;
@@ -23,17 +23,56 @@ interface Props {
 }
 
 export default function Historico() {
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [rangeSelector, setRangeSelector] = useState<
+    | { initialDate: Date; finalDate: Date; initialTime: Date; finalTime: Date }
+    | undefined
+  >(undefined);
   const { sells } = useContext(SellContext) as SellContextType;
   const [searcher, setSearcher] = useState("");
   const [page, setPage] = useState(0);
-  const amountPerPage = 15;
-  const filteredProducts = sells.filter((sell) =>
-    sell.buyerName
-      .toLocaleLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .includes(searcher.toLocaleLowerCase())
-  );
+  const amountPerPage = 10;
+
+  const convertDateToNumber = (date: Date) => {
+    return date.toLocaleDateString().split("/").reverse().join("")
+  }
+
+  const convertTimeToNumber = (date: Date) => {
+    return date.toLocaleTimeString()
+  }
+
+  const filteredProducts = rangeSelector
+    ? sells.filter((sell) => {
+        if (rangeSelector.initialDate && rangeSelector.finalDate) {
+          return (
+            convertDateToNumber(sell.sellDate) >= convertDateToNumber(rangeSelector.initialDate) &&
+            convertDateToNumber(sell.sellDate) <= convertDateToNumber(rangeSelector.finalDate)
+          );
+        } else if (rangeSelector.initialDate) {
+          return convertDateToNumber(sell.sellDate) >= convertDateToNumber(rangeSelector.initialDate);
+        } else if (rangeSelector.finalDate) {
+          return convertDateToNumber(sell.sellDate) <= convertDateToNumber(rangeSelector.finalDate);
+        }
+        return sell
+      }).filter((sell) => {
+        if (rangeSelector.initialTime && rangeSelector.finalTime) {
+          return (
+            convertTimeToNumber(sell.sellDate) >= convertTimeToNumber(rangeSelector.initialTime) &&
+            convertTimeToNumber(sell.sellDate) <= convertTimeToNumber(rangeSelector.finalTime)
+          );
+        } else if (rangeSelector.initialTime) {
+          return convertTimeToNumber(sell.sellDate) >= convertTimeToNumber(rangeSelector.initialTime);
+        } else if (rangeSelector.finalTime) {
+          return convertTimeToNumber(sell.sellDate) <= convertTimeToNumber(rangeSelector.finalTime);
+        }
+        return sell
+      })
+    : sells;
+
+  useEffect(() => {
+    console.log(rangeSelector);
+    setPage(0)
+  }, [rangeSelector]);
 
   const handleSearchProduct = (product: string) => {
     setSearcher(product);
@@ -75,14 +114,20 @@ export default function Historico() {
         <View style={styles.title}>
           <Text style={styles.titleText}>Historico de vendas</Text>
         </View>
-        <Calendar
+        <View style={styles.rangeSelector}>
+          <RangeSelector
+            rangeSelector={rangeSelector}
+            rangeSelectorData={setRangeSelector}
+          />
+        </View>
+        {/* <Calendar
           markingType="period"
           markedDates={{
             '2024-03-05': {startingDay: true, marked: true, dotColor: 'transparent', color: "#0ea5e9"},
             '2024-03-06': {marked: true, dotColor: 'transparent', color: "#0ea5e9"},
             '2024-03-07': {endingDay: true, marked: true, dotColor: 'transparent', color: "#0ea5e9"},
           }}
-        />
+        /> */}
         {/* <View style={styles.searcher}>
             <Searcher
               onChangeText={(text: string) => {
@@ -92,11 +137,13 @@ export default function Historico() {
             />
           </View> */}
         <View style={styles.flatlistContent}>
-          {filteredProducts.length !== 0 ? (
+          {sells.length !== 0 ? (
             <FlatList
-              data={sells.sort((a, b) =>
-                a.sellDate.toString().localeCompare(b.sellDate.toString())
-              ).reverse()}
+              data={filteredProducts
+                .sort((a, b) =>
+                  b.sellDate.valueOf() - a.sellDate.valueOf()
+                )
+                .slice(page * amountPerPage, (page + 1) * amountPerPage)}
               keyExtractor={(product) => String(product.id)}
               renderItem={({ item }) => (
                 <SellFlatList key={item.id} item={item} onRemove={() => {}} />
@@ -110,9 +157,7 @@ export default function Historico() {
         <View style={styles.pagination}>
           <ManualPagination
             paginationAmount={
-              filteredProducts.length !== 0
-                ? Math.ceil(filteredProducts.length / amountPerPage)
-                : 1
+              filteredProducts.length !== 0 ? Math.ceil(filteredProducts.length / amountPerPage) : 1
             }
             page={page}
             onPress={handleChangePage}
@@ -134,23 +179,20 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   title: {
-    height: "10%",
-    marginLeft: 10,
+    height: "8%",
+    paddingLeft: 10,
     justifyContent: "center",
   },
   titleText: {
     fontSize: 22,
     fontWeight: "800",
   },
-  searcher: {
-    width: "90%",
-    height: "10%",
-    justifyContent: "center",
-    alignSelf: "center",
+  rangeSelector: {
+    height: "12%",
   },
   flatlistContent: {
     width: Dimensions.get("window").width,
-    height: "80%",
+    height: "70%",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",

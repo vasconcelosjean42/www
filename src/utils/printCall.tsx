@@ -26,13 +26,10 @@ const printCall = async ({ sellProps, isValid }: Props) => {
           }
         </style>
       </head>
-      <body style="font-size: 12px; text-align: left; padding: 10px; font-family: Times New Roman, sans-serif;">
+      <body style="font-size: 10px; text-align: left; padding: 10px; font-family: Times New Roman, sans-serif;">
         <div>
-          <div style="height: 50px; display: flex; align-items: center; justify-content: center">
-            <img src="https://i.ibb.co/dmt1YH4/logo-jmm.png" alt="Logo JMM Solucoes Inteligentes" style="object-fit: contain; align-self: center; max-width: 100%; max-height: 100%"/>
-          </div>
           <div style="display: flex; flex-direction: row; font-weight: normal;">
-            <h1 style="font-size: 16px; font-weight: normal;">
+            <h1 style="font-size: 12px; font-weight: normal;">
               JMM VENDAS RÁPIDAS
             </h1>
             <p style="justify-self: right; text-align: right"> 26/02/2024\n15:50</p>

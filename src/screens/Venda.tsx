@@ -228,8 +228,9 @@ export default function Venda() {
             <Controller
               control={control}
               name="amount"
-              render={({ field: { onChange } }) => (
+              render={({ field: { value, onChange } }) => (
                 <Select
+                  value={value.toString()}
                   data={Array(100)
                     .fill(0)
                     .map((value, index) => index + 1)}
