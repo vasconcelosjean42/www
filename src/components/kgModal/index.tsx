@@ -64,6 +64,7 @@ export default function KGModal({
                   }}
                   autoFocus
                   keyboardType="numeric"
+                  maxLength={3}
                 />
               </View>
             )}
@@ -79,6 +80,7 @@ export default function KGModal({
                 onPress={() => {
                   reset();
                   setSelect("Dinheiro");
+                  setWeight(0)
                   setIsVisible();
                 }}
               />

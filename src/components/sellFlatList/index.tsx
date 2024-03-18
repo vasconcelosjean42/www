@@ -22,7 +22,9 @@ export default function SellFlatList({ item, onRemove }: Props) {
     <View style={styles.container}>
       <View style={styles.content}>
         <View style={styles.name}>
-          <Text style={styles.nameText}>{String(item.buyerName)}</Text>
+          {item.buyerName && (
+            <Text style={styles.nameText}>{String(item.buyerName)}</Text>
+          )}
           <Text style={styles.nameText}>
             {String(item.sellDate?.toLocaleString())}
           </Text>

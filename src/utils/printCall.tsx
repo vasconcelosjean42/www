@@ -26,10 +26,10 @@ const printCall = async ({ sellProps, isValid }: Props) => {
           }
         </style>
       </head>
-      <body style="font-size: 10px; text-align: left; padding: 10px; font-family: Times New Roman, sans-serif;">
+      <body style="font-size: 14px; text-align: left; padding: 10px; font-family: Times New Roman, sans-serif;">
         <div>
           <div style="display: flex; flex-direction: row; font-weight: normal;">
-            <h1 style="font-size: 12px; font-weight: normal;">
+            <h1 style="font-size: 16px; font-weight: normal;">
               JMM VENDAS RÁPIDAS
             </h1>
             <p style="justify-self: right; text-align: right"> 26/02/2024\n15:50</p>
@@ -80,6 +80,14 @@ const printCall = async ({ sellProps, isValid }: Props) => {
           <div style="font-size: 14px; border-width: 0px 0px 2px 0px; display: flex; flex-direction: row; justify-content: space-between">
             <em>Total a Pagar</em>
             <em>${"R$" + sellProps.totalPrice.toFixed(2).toString()}</em>
+          </div>
+          <div style="font-size: 14px; border-width: 0px 0px 2px 0px; display: flex; flex-direction: row; justify-content: space-between">
+            <em>Valor pago</em>
+            <em>${"R$" + Number(sellProps.paymentValue).toFixed(2)}</em>
+          </div>
+          <div style="font-size: 14px; border-width: 0px 0px 2px 0px; display: flex; flex-direction: row; justify-content: space-between">
+            <em>Troco</em>
+            <em>${"R$" + (sellProps.paymentValue - sellProps.totalPrice).toFixed(2).toString()}</em>
           </div>
         </div>
     </body>

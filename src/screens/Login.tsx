@@ -115,7 +115,7 @@ export default function Login() {
           name={"user"}
           rules={{ required: "O nome de usuário deve ser informado" }}
           render={({ field: { value, onChange } }) => (
-            <View style={{ width: "100%", marginVertical: 15 }}>
+            <View style={{ width: "100%", marginVertical: 20 }}>
               <Input2
                 value={value}
                 text={"Usuário"}

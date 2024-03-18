@@ -2,6 +2,8 @@ import { StyleSheet, View } from "react-native";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import Picker from "../picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { FontAwesome6 } from "@expo/vector-icons";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 interface Props {
   rangeSelector: {
@@ -25,7 +27,9 @@ export default function RangeSelector({
   rangeSelectorData,
 }: Props) {
   const [initialTimeState, setInitialTimeState] = useState<Date>(new Date());
-  const [finalTimeState, setFinalTimeState] = useState<Date | undefined>(undefined);
+  const [finalTimeState, setFinalTimeState] = useState<Date | undefined>(
+    undefined
+  );
   return (
     <View style={styles.container}>
       <View style={styles.pickers}>
@@ -38,6 +42,7 @@ export default function RangeSelector({
           }
           mode="date"
           text="Data inicial"
+          
           onConfirm={(data) => {
             rangeSelectorData({ ...rangeSelector, initialDate: data });
             return true;
@@ -64,6 +69,9 @@ export default function RangeSelector({
           }}
           onCancel={() => console.log("canceled")}
         />
+        <TouchableOpacity >
+          <FontAwesome6 name="eraser" size={24} color="black" />
+        </TouchableOpacity>
       </View>
       <View style={styles.pickers}>
         <Picker
@@ -118,6 +126,9 @@ export default function RangeSelector({
           }}
           onCancel={() => console.log("canceled")}
         />
+        <TouchableOpacity>
+          <FontAwesome6 name="eraser" size={24} color="black" />
+        </TouchableOpacity>
       </View>
     </View>
   );

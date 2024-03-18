@@ -42,6 +42,7 @@ export default function Picker({ mode, text, onConfirm, ...props }: Props) {
       </TouchableOpacity>
       <DateTimePickerModal
         {...props}
+        neutralButton={{label: "Clear", textColor: 'grey'}}
         isVisible={isPickerVisible}
         mode={mode}
         onConfirm={handleConfirm}

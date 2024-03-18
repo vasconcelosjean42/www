@@ -12,10 +12,10 @@ import { ISell, SellContextType } from "../../@types/sell";
 import printCall from "../../utils/printCall";
 
 interface SellProps {
-  buyerName: string,
-  buyerNumber: string,
-  paymentValue: number,
-  typeOfPayment: string,
+  buyerName: string;
+  buyerNumber: string;
+  paymentValue: number;
+  typeOfPayment: string;
 }
 
 interface Props {
@@ -41,7 +41,7 @@ export default function SellModal({
     clearErrors,
     formState: { errors, isValid },
   } = useForm<SellProps>();
-  const {sells, saveSell} = useContext(SellContext) as SellContextType
+  const { sells, saveSell } = useContext(SellContext) as SellContextType;
   const [select, setSelect] = useState("Dinheiro");
   const [paymentValue, setPaymentValue] = useState(0);
   const change = totalPrice - paymentValue;
@@ -55,16 +55,17 @@ export default function SellModal({
       ...data,
       products: items,
       totalPrice,
-      sellDate: new Date()
-    }
-    printCall({sellProps, isValid})
-        .then(() => {
-          onConfirm();
-          setSelect("Dinheiro")
-          saveSell(sellProps)
-        })
-        .catch((err) => console.log(err));
-    }
+      sellDate: new Date(),
+    };
+    printCall({ sellProps, isValid })
+      .then(() => {
+        onConfirm();
+        setSelect("Dinheiro");
+        saveSell(sellProps);
+        reset()
+      })
+      .catch((err) => console.log(err));
+  };
 
   return (
     <Modal animationType="fade" transparent visible={isVisible}>
@@ -127,15 +128,17 @@ export default function SellModal({
                 },
               }}
               render={({ field: { onChange } }) => (
-                <Input
-                  text={"Valor"}
-                  onChangeText={(e) => {
-                    setPaymentValue(Number(e));
-                    onChange(e);
-                  }}
-                  errorMessage={errors.paymentValue?.message}
-                  keyboardType="numeric"
-                />
+                <View style={{ marginBottom: 10 }}>
+                  <Input
+                    text={"Valor"}
+                    onChangeText={(e) => {
+                      setPaymentValue(Number(e));
+                      onChange(e);
+                    }}
+                    errorMessage={errors.paymentValue?.message}
+                    keyboardType="numeric"
+                  />
+                </View>
               )}
             />
           )}
@@ -169,7 +172,6 @@ export default function SellModal({
     </Modal>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {
