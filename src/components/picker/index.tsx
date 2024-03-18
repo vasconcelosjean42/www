@@ -7,7 +7,7 @@ import { useState } from "react";
 interface Props extends DateTimePickerProps {
   mode: "date" | "time" | "datetime" | undefined;
   text: string;
-  onConfirm: (data: Date) => void;
+  onConfirm: (data: Date) => boolean;
 }
 
 export default function Picker({ mode, text, onConfirm, ...props }: Props) {
@@ -22,11 +22,16 @@ export default function Picker({ mode, text, onConfirm, ...props }: Props) {
   };
 
   const handleConfirm = (date: Date) => {
-    console.warn("A date has been picked: ", date);
-    setLocalText(
+    console.log("A date has been picked: ", date);
+    // setLocalText(
+    //   mode === "date" ? date.toLocaleDateString() : date.toLocaleTimeString()
+    // );
+    // onConfirm(date);
+
+    onConfirm(date) ? setLocalText(
       mode === "date" ? date.toLocaleDateString() : date.toLocaleTimeString()
-    );
-    onConfirm(date);
+    ): setLocalText("Inválido");
+
     hideDatePicker();
   };
 

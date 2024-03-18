@@ -22,7 +22,7 @@ export default function InputPassword({ text, errorMessage, ...props }: Props) {
         onChange={(texto) => setInputValue(texto.nativeEvent.text)}
         secureTextEntry={isHide}
       />
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={styles.icon}
         onPress={() => setIsHide((prevState) => !prevState)}
       >
@@ -31,7 +31,7 @@ export default function InputPassword({ text, errorMessage, ...props }: Props) {
           color="#000"
           size={25}
         />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       {errorMessage && <Text style={{position: "absolute", top: 50, color: "#d41515"}}>{errorMessage}</Text>}
     </View>
   );

@@ -1,10 +1,16 @@
-import { Image, StyleSheet, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 import Button from "../components/button";
-import InputPassword from "../components/inputPassword";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { ParamListBase, useNavigation } from "@react-navigation/native";
+import {
+  ParamListBase,
+  useIsFocused,
+  useNavigation,
+} from "@react-navigation/native";
 import { Controller, useForm } from "react-hook-form";
 import Input2 from "../components/input/index2";
+import CheckBox from "expo-checkbox";
+import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Props {
   user: string;
@@ -15,13 +21,87 @@ export default function Login() {
   const {
     control,
     handleSubmit,
-    formState: { errors, isValid },
+    setValue,
+    reset,
+    resetField,
+    clearErrors,
+    formState: {
+      errors,
+      isValid,
+      isSubmitSuccessful,
+      isSubmitted,
+      touchedFields,
+      isSubmitting,
+    },
   } = useForm<Props>();
   const navigation = useNavigation<StackNavigationProp<ParamListBase>>();
+  const isFocused = useIsFocused();
 
-  const onSubmit = (data: Props) => {
-    if (isValid) navigation.navigate("Home");
+  const [isSelected, setSelection] = useState(false);
+
+  const onSubmit = async (data: Props) => {
+    try {
+      if (isSelected) {
+        await AsyncStorage.setItem("user", data.user);
+        await AsyncStorage.setItem("password", data.password);
+      }
+    } catch (e) {
+      console.log("AS of onSubmit: " + e);
+    }
+    console.log("isValid: ", isValid);
+    console.log(errors)
+    
   };
+
+
+
+  useEffect(() => {
+    console.log("is submitted"+isValid); 
+    if (isSubmitting && JSON.stringify(errors) === JSON.stringify({})) {
+      reset();
+      navigation.navigate("Home");
+    }
+  }, [isSubmitting])
+
+  useEffect(() => {
+    console.log("isFocused useEffect");
+    const loginRemember = async () => {
+      try {
+        const user = await AsyncStorage.getItem("user");
+        const password = await AsyncStorage.getItem("password");
+        console.log("pegou o user e o password: " + user + " - " + password);
+
+        if (user && password) {
+          setValue("user", user);
+          setValue("password", password);
+          clearErrors()
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    loginRemember();
+  }, [isFocused]);
+
+  // useEffect(() => {
+  //   console.log("useEffect loginRemember");
+
+  //   const loginRemember = async () => {
+  //     try {
+  //       const user = await AsyncStorage.getItem("user");
+  //       const password = await AsyncStorage.getItem("password");
+  //       if (isSelected) {
+  //         if (user && password) {
+  //           setValue("user", user);
+  //           setValue("password", password);
+  //         }
+  //       }
+  //     } catch (e) {
+  //       console.log("AS of useEffect: " + e);
+  //     }
+  //   };
+  //   loginRemember();
+  // }, [isSubmitSuccessful]);
 
   return (
     <View style={styles.container}>
@@ -34,9 +114,10 @@ export default function Login() {
           control={control}
           name={"user"}
           rules={{ required: "O nome de usuário deve ser informado" }}
-          render={({ field: { onChange } }) => (
-            <View style={{width: "100%", marginVertical: 15}}>
+          render={({ field: { value, onChange } }) => (
+            <View style={{ width: "100%", marginVertical: 15 }}>
               <Input2
+                value={value}
                 text={"Usuário"}
                 errorMessage={errors.user?.message}
                 onChangeText={onChange}
@@ -48,18 +129,30 @@ export default function Login() {
           control={control}
           name={"password"}
           rules={{ required: "A senha deve ser informada" }}
-          render={({ field: { onChange } }) => (
-            <View style={{width: "100%", marginBottom: 15}}>
-            <InputPassword
-              text={"Senha"}
-              errorMessage={errors.password?.message}
-              onChangeText={onChange}
-            />
+          render={({ field: { value, onChange } }) => (
+            <View style={{ width: "100%", marginBottom: 5 }}>
+              <Input2
+                value={value}
+                text={"Senha"}
+                errorMessage={errors.password?.message}
+                onChangeText={onChange}
+                secureTextEntry
+              />
             </View>
           )}
         />
-
-        <Button text={"Entrar"} onPress={handleSubmit(onSubmit)} />
+        <View style={styles.checkboxContainer}>
+          <Text style={styles.label}>Lembrar login</Text>
+          <CheckBox
+            value={isSelected}
+            onValueChange={setSelection}
+            style={styles.checkbox}
+          />
+        </View>
+        <Button
+          text={"Entrar"}
+          onPress={handleSubmit(onSubmit)}
+        />
       </View>
     </View>
   );
@@ -83,5 +176,16 @@ const styles = StyleSheet.create({
   image: {
     width: 220,
     height: 100,
+  },
+  checkboxContainer: {
+    flexDirection: "row",
+    marginBottom: 10,
+    alignSelf: "flex-end",
+  },
+  checkbox: {
+    alignSelf: "center",
+  },
+  label: {
+    margin: 8,
   },
 });

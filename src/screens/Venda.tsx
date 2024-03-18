@@ -20,6 +20,7 @@ import KGModal from "../components/kgModal";
 import { ParamListBase, useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import Input2 from "../components/input/index2";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Venda() {
   const {
@@ -31,13 +32,7 @@ export default function Venda() {
     setError,
     reset,
     watch,
-    formState: {
-      errors,
-      isSubmitSuccessful,
-      isSubmitted,
-      submitCount,
-      isDirty,
-    },
+    formState: { errors, isSubmitSuccessful, isDirty },
   } = useForm<IProduct>({
     defaultValues: { amount: 1 },
   });
@@ -178,6 +173,12 @@ export default function Venda() {
       navigation.navigate("Home");
       return true;
     });
+    const teste = async () => {
+      const user = await AsyncStorage.getItem("user");
+      console.log(user);
+      
+    };
+    teste();
   }, []);
 
   useEffect(() => {
@@ -286,7 +287,7 @@ export default function Venda() {
             onPress={() => {
               setIsVisible((prevState) => !prevState);
             }}
-            openHistoric={() => navigation.navigate('Historico')}
+            openHistoric={() => navigation.navigate("Historico")}
           />
         </View>
       </View>

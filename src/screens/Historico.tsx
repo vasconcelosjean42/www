@@ -24,54 +24,79 @@ interface Props {
 
 export default function Historico() {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-  const [rangeSelector, setRangeSelector] = useState<
-    | { initialDate: Date; finalDate: Date; initialTime: Date; finalTime: Date }
-    | undefined
-  >(undefined);
+  const [rangeSelector, setRangeSelector] = useState<{
+    initialDate: Date | undefined;
+    finalDate: Date | undefined;
+    initialTime: Date | undefined;
+    finalTime: Date | undefined;
+  }>({
+    initialDate: undefined,
+    finalDate: undefined,
+    initialTime: undefined,
+    finalTime: undefined,
+  });
   const { sells } = useContext(SellContext) as SellContextType;
   const [searcher, setSearcher] = useState("");
   const [page, setPage] = useState(0);
   const amountPerPage = 10;
 
   const convertDateToNumber = (date: Date) => {
-    return date.toLocaleDateString().split("/").reverse().join("")
-  }
+    return date.toLocaleDateString().split("/").reverse().join("");
+  };
 
   const convertTimeToNumber = (date: Date) => {
-    return date.toLocaleTimeString()
-  }
+    return date.toLocaleTimeString();
+  };
 
   const filteredProducts = rangeSelector
-    ? sells.filter((sell) => {
-        if (rangeSelector.initialDate && rangeSelector.finalDate) {
-          return (
-            convertDateToNumber(sell.sellDate) >= convertDateToNumber(rangeSelector.initialDate) &&
-            convertDateToNumber(sell.sellDate) <= convertDateToNumber(rangeSelector.finalDate)
-          );
-        } else if (rangeSelector.initialDate) {
-          return convertDateToNumber(sell.sellDate) >= convertDateToNumber(rangeSelector.initialDate);
-        } else if (rangeSelector.finalDate) {
-          return convertDateToNumber(sell.sellDate) <= convertDateToNumber(rangeSelector.finalDate);
-        }
-        return sell
-      }).filter((sell) => {
-        if (rangeSelector.initialTime && rangeSelector.finalTime) {
-          return (
-            convertTimeToNumber(sell.sellDate) >= convertTimeToNumber(rangeSelector.initialTime) &&
-            convertTimeToNumber(sell.sellDate) <= convertTimeToNumber(rangeSelector.finalTime)
-          );
-        } else if (rangeSelector.initialTime) {
-          return convertTimeToNumber(sell.sellDate) >= convertTimeToNumber(rangeSelector.initialTime);
-        } else if (rangeSelector.finalTime) {
-          return convertTimeToNumber(sell.sellDate) <= convertTimeToNumber(rangeSelector.finalTime);
-        }
-        return sell
-      })
+    ? sells
+        .filter((sell) => {
+          if (rangeSelector.initialDate && rangeSelector.finalDate) {
+            return (
+              convertDateToNumber(sell.sellDate) >=
+                convertDateToNumber(rangeSelector.initialDate) &&
+              convertDateToNumber(sell.sellDate) <=
+                convertDateToNumber(rangeSelector.finalDate)
+            );
+          } else if (rangeSelector.initialDate) {
+            return (
+              convertDateToNumber(sell.sellDate) >=
+              convertDateToNumber(rangeSelector.initialDate)
+            );
+          } else if (rangeSelector.finalDate) {
+            return (
+              convertDateToNumber(sell.sellDate) <=
+              convertDateToNumber(rangeSelector.finalDate)
+            );
+          }
+          return sell;
+        })
+        .filter((sell) => {
+          if (rangeSelector.initialTime && rangeSelector.finalTime) {
+            return (
+              convertTimeToNumber(sell.sellDate) >=
+                convertTimeToNumber(rangeSelector.initialTime) &&
+              convertTimeToNumber(sell.sellDate) <=
+                convertTimeToNumber(rangeSelector.finalTime)
+            );
+          } else if (rangeSelector.initialTime) {
+            return (
+              convertTimeToNumber(sell.sellDate) >=
+              convertTimeToNumber(rangeSelector.initialTime)
+            );
+          } else if (rangeSelector.finalTime) {
+            return (
+              convertTimeToNumber(sell.sellDate) <=
+              convertTimeToNumber(rangeSelector.finalTime)
+            );
+          }
+          return sell;
+        })
     : sells;
 
   useEffect(() => {
     console.log(rangeSelector);
-    setPage(0)
+    setPage(0);
   }, [rangeSelector]);
 
   const handleSearchProduct = (product: string) => {
@@ -116,7 +141,7 @@ export default function Historico() {
         </View>
         <View style={styles.rangeSelector}>
           <RangeSelector
-            rangeSelector={rangeSelector}
+            rangeSelector={rangeSelector!}
             rangeSelectorData={setRangeSelector}
           />
         </View>
@@ -137,12 +162,10 @@ export default function Historico() {
             />
           </View> */}
         <View style={styles.flatlistContent}>
-          {sells.length !== 0 ? (
+          {filteredProducts.length !== 0 ? (
             <FlatList
               data={filteredProducts
-                .sort((a, b) =>
-                  b.sellDate.valueOf() - a.sellDate.valueOf()
-                )
+                .sort((a, b) => b.sellDate.valueOf() - a.sellDate.valueOf())
                 .slice(page * amountPerPage, (page + 1) * amountPerPage)}
               keyExtractor={(product) => String(product.id)}
               renderItem={({ item }) => (
@@ -151,13 +174,15 @@ export default function Historico() {
               style={styles.flatList}
             />
           ) : (
-            <Text>Nenhum produto encontrado com esse nome</Text>
+            <Text style={{ fontSize: 18 }}>Nenhuma venda nesse período</Text>
           )}
         </View>
         <View style={styles.pagination}>
           <ManualPagination
             paginationAmount={
-              filteredProducts.length !== 0 ? Math.ceil(filteredProducts.length / amountPerPage) : 1
+              filteredProducts.length !== 0
+                ? Math.ceil(filteredProducts.length / amountPerPage)
+                : 1
             }
             page={page}
             onPress={handleChangePage}
